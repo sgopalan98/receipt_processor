@@ -161,7 +161,7 @@ func TestConvertJson(t *testing.T) {
 
 		expectedReceipt := sampleReceipts[index]
 
-		actualReceipt := convertJson(sampleJson)
+		actualReceipt := convertJsonToRecept(sampleJson)
 		comparison := compareReceipts(actualReceipt, expectedReceipt)
 		if !comparison {
 			t.Errorf("NOT EQUAL \n")

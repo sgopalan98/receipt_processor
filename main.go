@@ -3,10 +3,17 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"math"
+	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 )
+
+var receiptPointsMapping = make(map[string]int)
 
 // Item struct
 type Item struct {
@@ -21,6 +28,15 @@ type Receipt struct {
 	PurchaseTime string `json:"purchaseTime"`
 	Total        string `json:"total"`
 	Items        []Item `json:"items"`
+}
+
+// Response struct
+type ProcessResponse struct {
+	Id string `json:"id"`
+}
+
+type PointsResponse struct {
+	Points string `json:"points"`
 }
 
 // Compute points based off Retailer Name
@@ -135,7 +151,7 @@ func computePoints(receipt Receipt) int {
 	return totalPoints
 }
 
-func convertJson(jsonStr string) Receipt {
+func convertJsonToRecept(jsonStr string) Receipt {
 	// TODO: Is this the way to do?
 	var receipt Receipt
 	err := json.Unmarshal([]byte(jsonStr), &receipt)
@@ -147,7 +163,118 @@ func convertJson(jsonStr string) Receipt {
 	return receipt
 }
 
+// TODO: All errors should be handled
+func receiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("receipts process handler called")
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+	}
+	reqBodyBytes, err := ioutil.ReadAll(r.Body)
+
+	// TODO: Error handling done to be better
+	if err != nil {
+		fmt.Println("Error reading from request body:", err)
+		return
+	}
+
+	// Convert bytes to string
+	receiptJson := string(reqBodyBytes)
+	receipt := convertJsonToRecept(receiptJson)
+	points := computePoints(receipt)
+
+	// Generate a UUID
+	uuidObj, _ := uuid.NewRandom()
+	// Convert the UUID to an alphanumeric string
+	id := uuidObj.String()
+
+	receiptPointsMapping[id] = points
+
+	// Generate response and send response
+	response := ProcessResponse{
+		Id: id,
+	}
+
+	// Convert Response to JSON
+	jsonData, _ := json.Marshal(response)
+
+	// Set the response headers
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	// Write the JSON data to the response body
+	fmt.Fprint(w, string(jsonData))
+}
+
+// TODO: all errors should be handled
+func receiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("receipts points handler called")
+	if r.Method != "GET" {
+		http.NotFound(w, r)
+		// TODO: Do you need return?
+		return
+	}
+
+	// Get the path from the request URL
+	path := r.URL.Path
+
+	// Extract the id from the path
+	parts := strings.Split(path, "/")
+
+	// Checking if URL is correct
+	if parts[1] != "receipts" {
+		http.NotFound(w, r)
+		return
+	}
+
+	if parts[3] != "points" {
+		http.NotFound(w, r)
+		return
+	}
+	id := parts[2]
+
+	points, ok := receiptPointsMapping[id]
+
+	if !ok {
+		fmt.Printf("ID %s not found\n", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	pointsReponse := PointsResponse{
+		Points: strconv.Itoa(points),
+	}
+
+	// Convert Response to JSON
+	jsonData, _ := json.Marshal(pointsReponse)
+
+	// Set the response headers
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	// Write the JSON data to the response body
+	fmt.Fprint(w, string(jsonData))
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Hello, World!")
+}
+
 func main() {
-	fmt.Printf("main starting\n")
-	// receiptPointsMapping := make(map[string]int)
+
+	// TODO: Does this execute concurrently? Need to research and change code according to that!
+	// TODO: What is mux?
+	// mux := http.NewServeMux()
+	// mux.HandleFunc("/receipts/process", http.HandlerFunc(receiptsProcessHandler))
+	// mux.HandleFunc("/receipts", http.HandlerFunc(receiptsPointsHandler))
+	// mux.HandleFunc("/", http.HandlerFunc(indexHandler))
+
+	http.HandleFunc("/receipts/process", receiptsProcessHandler)
+	http.HandleFunc("/receipts/", receiptsPointsHandler)
+	http.HandleFunc("/", indexHandler)
+
+	// Start the HTTP server
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
