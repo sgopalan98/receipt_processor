@@ -37,7 +37,7 @@ func computeRetailerNamePoints(retailerName string) int {
 
 func descriptionPoints(receipt Receipt) int {
 	items := receipt.Items
-	points := 0.
+	points := 0
 	for _, item := range items {
 		trimmedItemDescription := strings.TrimSpace(item.ShortDescription)
 		// TODO: DO you actually need these variables or can you just use len straight forward?
@@ -45,11 +45,13 @@ func descriptionPoints(receipt Receipt) int {
 		if trimmedItemDescriptionLength%3 == 0 {
 			// TODO: Error handling
 			price, _ := strconv.ParseFloat(item.Price, 64)
-			points += price * 0.2
+			//TODO: Problem statement - wrong? Round != Ceil. Notify
+			roundedPoints := int(math.Ceil(price * 0.2))
+			points += roundedPoints
 		}
 	}
 
-	return int(math.Round(points))
+	return points
 }
 
 func datePoints(receipt Receipt) int {

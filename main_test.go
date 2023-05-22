@@ -8,7 +8,7 @@ import (
 
 //TODO: Is this the way to do?
 func getSampleJsonPaths() []string {
-	samples := []string{"samples/simple-receipt.json", "samples/morning-receipt.json"}
+	samples := []string{"samples/morning-receipt.json", "samples/simple-receipt.json", "samples/target.json", "samples/m-m.json"}
 	return samples
 }
 
@@ -43,13 +43,65 @@ func getSampleReceipts() []Receipt {
 				},
 			},
 		},
+		{
+			Retailer:     "Target",
+			PurchaseDate: "2022-01-01",
+			PurchaseTime: "13:01",
+			Total:        "35.35",
+			Items: []Item{
+				{
+					ShortDescription: "Mountain Dew 12PK",
+					Price:            "6.49",
+				},
+				{
+					ShortDescription: "Emils Cheese Pizza",
+					Price:            "12.25",
+				},
+				{
+					ShortDescription: "Knorr Creamy Chicken",
+					Price:            "1.26",
+				},
+				{
+					ShortDescription: "Doritos Nacho Cheese",
+					Price:            "3.35",
+				},
+				{
+					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
+					Price:            "12.00",
+				},
+			},
+		},
+		{
+			Retailer:     "M&M Corner Market",
+			PurchaseDate: "2022-03-20",
+			PurchaseTime: "14:33",
+			Total:        "9.00",
+			Items: []Item{
+				{
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
+				},
+				{
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
+				},
+				{
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
+				},
+				{
+					ShortDescription: "Gatorade",
+					Price:            "2.25",
+				},
+			},
+		},
 	}
 	return samples
 }
 
 // TODO: Compute manually
 func getSamplePoints() []int {
-	points := []int{14, 31}
+	points := []int{15, 31, 28, 109}
 	return points
 }
 
@@ -89,8 +141,8 @@ func compareReceipts(receiptA, receiptB Receipt) bool {
 	return true
 }
 
+// TODO: Think about if you actually need this - because the code is pretty much standard.
 func TestConvertJson(t *testing.T) {
-	fmt.Printf("STARTING\n")
 	sampleJsonPaths := getSampleJsonPaths()
 	sampleReceipts := getSampleReceipts()
 
