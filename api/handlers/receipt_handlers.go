@@ -190,7 +190,6 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-
 	if parts[3] != "points" {
 		http.NotFound(w, r)
 		return
