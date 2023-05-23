@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"fmt"
-	"io/ioutil"
 	"testing"
 
 	"github.com/sgoplan98/receipt_processor/api/models"
@@ -21,15 +19,15 @@ func getSampleReceipts() []models.Receipt {
 			Retailer:     "Walgreens",
 			PurchaseDate: "2022-01-02",
 			PurchaseTime: "08:13",
-			Total:        "2.65",
+			Total:        2.65,
 			Items: []models.Item{
 				{
 					ShortDescription: "Pepsi - 12-oz",
-					Price:            "1.25",
+					Price:            1.25,
 				},
 				{
 					ShortDescription: "Dasani",
-					Price:            "1.40",
+					Price:            1.40,
 				},
 			},
 		},
@@ -37,11 +35,11 @@ func getSampleReceipts() []models.Receipt {
 			Retailer:     "Target",
 			PurchaseDate: "2022-01-02",
 			PurchaseTime: "13:13",
-			Total:        "1.25",
+			Total:        1.25,
 			Items: []models.Item{
 				{
 					ShortDescription: "Pepsi - 12-oz",
-					Price:            "1.25",
+					Price:            1.25,
 				},
 			},
 		},
@@ -49,27 +47,27 @@ func getSampleReceipts() []models.Receipt {
 			Retailer:     "Target",
 			PurchaseDate: "2022-01-01",
 			PurchaseTime: "13:01",
-			Total:        "35.35",
+			Total:        35.35,
 			Items: []models.Item{
 				{
 					ShortDescription: "Mountain Dew 12PK",
-					Price:            "6.49",
+					Price:            6.49,
 				},
 				{
 					ShortDescription: "Emils Cheese Pizza",
-					Price:            "12.25",
+					Price:            12.25,
 				},
 				{
 					ShortDescription: "Knorr Creamy Chicken",
-					Price:            "1.26",
+					Price:            1.26,
 				},
 				{
 					ShortDescription: "Doritos Nacho Cheese",
-					Price:            "3.35",
+					Price:            3.35,
 				},
 				{
 					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
-					Price:            "12.00",
+					Price:            12.00,
 				},
 			},
 		},
@@ -77,23 +75,23 @@ func getSampleReceipts() []models.Receipt {
 			Retailer:     "M&M Corner Market",
 			PurchaseDate: "2022-03-20",
 			PurchaseTime: "14:33",
-			Total:        "9.00",
+			Total:        9.00,
 			Items: []models.Item{
 				{
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            2.25,
 				},
 				{
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            2.25,
 				},
 				{
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            2.25,
 				},
 				{
 					ShortDescription: "Gatorade",
-					Price:            "2.25",
+					Price:            2.25,
 				},
 			},
 		},
@@ -105,70 +103,6 @@ func getSampleReceipts() []models.Receipt {
 func getSamplePoints() []int {
 	points := []int{15, 31, 28, 109}
 	return points
-}
-
-// TODO: None of the falses explain what the difference is.
-func compareItems(itemA, itemB models.Item) bool {
-	if itemA.ShortDescription != itemB.ShortDescription {
-		return false
-	}
-	if itemA.Price != itemB.Price {
-		return false
-	}
-	return true
-}
-
-// TODO: None of the falses return what is the difference in the receipts
-func compareReceipts(receiptA, receiptB models.Receipt) bool {
-	if receiptA.Retailer != receiptB.Retailer {
-		return false
-	}
-	if receiptA.PurchaseDate != receiptB.PurchaseDate {
-		return false
-	}
-	if receiptA.PurchaseTime != receiptB.PurchaseTime {
-		return false
-	}
-	if len(receiptA.Items) != len(receiptB.Items) {
-		return false
-	}
-
-	for index := 0; index < len(receiptA.Items); index++ {
-		itemA := receiptA.Items[index]
-		itemB := receiptB.Items[index]
-		if !compareItems(itemA, itemB) {
-			return false
-		}
-	}
-	return true
-}
-
-// TODO: Think about if you actually need this - because the code is pretty much standard.
-func TestConvertJson(t *testing.T) {
-	sampleJsonPaths := getSampleJsonPaths()
-	sampleReceipts := getSampleReceipts()
-
-	for index := 0; index < len(sampleJsonPaths); index++ {
-		sampleJsonPath := sampleJsonPaths[index]
-
-		// Read the file contents as bytes
-		fileBytes, err := ioutil.ReadFile(sampleJsonPath)
-		if err != nil {
-			fmt.Println("Error reading file:", err)
-			return
-		}
-
-		// Convert bytes to string
-		sampleJson := string(fileBytes)
-
-		expectedReceipt := sampleReceipts[index]
-
-		actualReceipt := models.ConvertJsonToRecept(sampleJson)
-		comparison := compareReceipts(actualReceipt, expectedReceipt)
-		if !comparison {
-			t.Errorf("NOT EQUAL \n")
-		}
-	}
 }
 
 func TestComputePoints(t *testing.T) {

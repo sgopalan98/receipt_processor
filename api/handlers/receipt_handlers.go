@@ -36,10 +36,8 @@ func descriptionPoints(receipt models.Receipt) int {
 		// TODO: DO you actually need these variables or can you just use len straight forward?
 		trimmedItemDescriptionLength := len(trimmedItemDescription)
 		if trimmedItemDescriptionLength%3 == 0 {
-			// TODO: Error handling
-			price, _ := strconv.ParseFloat(item.Price, 64)
 			//TODO: Problem statement - wrong? Round != Ceil. Notify
-			roundedPoints := int(math.Ceil(price * 0.2))
+			roundedPoints := int(math.Ceil(item.Price * 0.2))
 			points += roundedPoints
 		}
 	}
@@ -93,7 +91,7 @@ func computePoints(receipt models.Receipt) int {
 	// Add 50 points if Receipt total is round
 	// TODO: Check if any other type is possible?
 	// TODO: Check if I can convert the types when JSON is parsed?
-	receiptTotal, _ := strconv.ParseFloat(receipt.Total, 64)
+	receiptTotal := receipt.Total
 	isRound := math.Trunc(receiptTotal) == receiptTotal
 	if isRound {
 		totalPoints += 50
@@ -133,18 +131,27 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("receipts process handler called")
 	if r.Method != "POST" {
 		http.NotFound(w, r)
+		// TODO: Should you return after not found? Change in all if required
+		return
 	}
 	reqBodyBytes, err := ioutil.ReadAll(r.Body)
 
-	// TODO: Error handling done to be better
+	// TODO: Error handling done to be better - better text
 	if err != nil {
 		fmt.Println("Error reading from request body:", err)
+		// TODO: Return http something
 		return
 	}
 
 	// Convert bytes to string
 	receiptJson := string(reqBodyBytes)
-	receipt := models.ConvertJsonToRecept(receiptJson)
+	receipt, err := models.ConvertJsonToRecept(receiptJson)
+	if err != nil {
+		fmt.Println("Invalid data: ", err)
+		// TODO: Return http something
+		return
+	}
+
 	points := computePoints(receipt)
 
 	// Generate a UUID
@@ -186,6 +193,7 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	parts := strings.Split(path, "/")
 
 	// Checking if URL is correct
+	// SHould you check for more than 4? - Error?
 	if parts[1] != "receipts" {
 		http.NotFound(w, r)
 		return
