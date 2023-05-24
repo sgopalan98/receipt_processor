@@ -7,7 +7,7 @@ import (
 )
 
 // mock data for validation
-func validationTestMockData() ([]Receipt, []error) {
+func getValidationTestMockData() ([]Receipt, []error) {
 	var receipts []Receipt
 	var errors []error
 
@@ -79,7 +79,7 @@ func validationTestMockData() ([]Receipt, []error) {
 }
 
 // mock data for json convertion
-func convertJsonMockData() ([]string, []Receipt) {
+func getConvertJsonMockData() ([]string, []Receipt) {
 	var jsonPaths []string
 	var receipts []Receipt
 
@@ -181,7 +181,7 @@ func compareReceipts(receiptA, receiptB Receipt) error {
 // TODO: Think about if you actually need this - because the code is pretty much standard.
 func TestConvertJson(t *testing.T) {
 
-	jsonPaths, receipts := convertJsonMockData()
+	jsonPaths, receipts := getConvertJsonMockData()
 
 	for index := 0; index < len(jsonPaths); index++ {
 		sampleJsonPath := jsonPaths[index]
@@ -213,7 +213,7 @@ func TestConvertJson(t *testing.T) {
 }
 
 func TestValidationRules(t *testing.T) {
-	inputs, expectedOutputs := validationTestMockData()
+	inputs, expectedOutputs := getValidationTestMockData()
 
 	for index := 0; index < len(inputs); index++ {
 		input := inputs[index]
