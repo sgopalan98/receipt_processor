@@ -6,16 +6,14 @@ import (
 	"github.com/sgoplan98/receipt_processor/api/models"
 )
 
-//TODO: Is this the way to do?
-func getSampleJsonPaths() []string {
-	samples := []string{"samples/morning-receipt.json", "samples/simple-receipt.json", "samples/target.json", "samples/m-m.json"}
-	return samples
-}
-
-// TODO: Is this the way to do?
-func getSampleReceipts() []models.Receipt {
-	samples := []models.Receipt{
-		{
+var MockData = []struct {
+	Name        string
+	ReceiptData models.Receipt
+	Points      int
+}{
+	{
+		Name: "morning-receipt",
+		ReceiptData: models.Receipt{
 			Retailer:     "Walgreens",
 			PurchaseDate: "2022-01-02",
 			PurchaseTime: "08:13",
@@ -31,7 +29,11 @@ func getSampleReceipts() []models.Receipt {
 				},
 			},
 		},
-		{
+		Points: 15,
+	},
+	{
+		Name: "simple-receipt",
+		ReceiptData: models.Receipt{
 			Retailer:     "Target",
 			PurchaseDate: "2022-01-02",
 			PurchaseTime: "13:13",
@@ -43,7 +45,11 @@ func getSampleReceipts() []models.Receipt {
 				},
 			},
 		},
-		{
+		Points: 31,
+	},
+	{
+		Name: "target",
+		ReceiptData: models.Receipt{
 			Retailer:     "Target",
 			PurchaseDate: "2022-01-01",
 			PurchaseTime: "13:01",
@@ -71,7 +77,11 @@ func getSampleReceipts() []models.Receipt {
 				},
 			},
 		},
-		{
+		Points: 28,
+	},
+	{
+		Name: "m-m",
+		ReceiptData: models.Receipt{
 			Retailer:     "M&M Corner Market",
 			PurchaseDate: "2022-03-20",
 			PurchaseTime: "14:33",
@@ -95,30 +105,21 @@ func getSampleReceipts() []models.Receipt {
 				},
 			},
 		},
-	}
-	return samples
-}
-
-// TODO: Compute manually
-func getSamplePoints() []int {
-	points := []int{15, 31, 28, 109}
-	return points
+		Points: 109,
+	},
 }
 
 func TestComputePoints(t *testing.T) {
-	sampleJsonReceipts := getSampleReceipts()
-	samplePoints := getSamplePoints()
-	sampleJsonPaths := getSampleJsonPaths()
+	mockData := MockData
+	for index := 0; index < len(mockData); index++ {
+		sampleReceipt := mockData[index].ReceiptData
+		expectedPoints := mockData[index].Points
+		name := mockData[index].Name
 
-	// TODO: Is this the for loop way?
-	for index := 0; index < len(sampleJsonReceipts); index++ {
-		sampleJsonReceipt := sampleJsonReceipts[index]
-		expectedPoints := samplePoints[index]
-
-		actualPoints := computePoints(sampleJsonReceipt)
+		actualPoints := computePoints(sampleReceipt)
 
 		if expectedPoints != actualPoints {
-			t.Errorf("For %s, computed points = %d, expected points = %d \n", sampleJsonPaths[index], actualPoints, expectedPoints)
+			t.Errorf("For %s, computed points = %d, expected points = %d \n", name, actualPoints, expectedPoints)
 		}
 	}
 }

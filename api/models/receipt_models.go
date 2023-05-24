@@ -21,7 +21,6 @@ type Receipt struct {
 	Items        []Item  `json:"items"`
 }
 
-// TODO: Should this conversion function also present in the same file?
 func ConvertJsonToRecept(jsonStr string) (Receipt, error) {
 	// TODO: Is this the way to do?
 	var receipt Receipt
@@ -41,17 +40,17 @@ func validateReceipt(receipt Receipt) error {
 	//validation rule for date
 	dateValidationRegex := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 	if receipt.PurchaseDate == "" {
-		return fmt.Errorf("Purchase date is required")
+		return fmt.Errorf("purchase date is required")
 	} else if !dateValidationRegex.MatchString(receipt.PurchaseDate) {
-		return fmt.Errorf("Purchase date format should be in the format yyyy-mm-dd")
+		return fmt.Errorf("purchase date format should be in the format yyyy-mm-dd")
 	}
 
 	// validation rule for time
 	timeValidationRegex := regexp.MustCompile(`^\d{2}:\d{2}$`)
 	if receipt.PurchaseTime == "" {
-		return fmt.Errorf("Purchase date is required")
+		return fmt.Errorf("purchase time is required")
 	} else if !timeValidationRegex.MatchString(receipt.PurchaseTime) {
-		return fmt.Errorf("Purchase date format should be in the format yyyy-mm-dd")
+		return fmt.Errorf("purchase time format should be in the format hh:mm")
 	}
 
 	return nil

@@ -6,100 +6,140 @@ import (
 	"testing"
 )
 
-//TODO: Is this the way to do?
-func getSampleJsonPaths() []string {
-	samples := []string{"samples/morning-receipt.json", "samples/simple-receipt.json", "samples/target.json", "samples/m-m.json"}
-	return samples
-}
+// mock data for validation
+func validationTestMockData() ([]Receipt, []error) {
+	var receipts []Receipt
+	var errors []error
 
-// TODO: Is this the way to do?
-func getSampleReceipts() []Receipt {
-	samples := []Receipt{
-		{
-			Retailer:     "Walgreens",
-			PurchaseDate: "2022-01-02",
-			PurchaseTime: "08:13",
-			Total:        2.65,
-			Items: []Item{
-				{
-					ShortDescription: "Pepsi - 12-oz",
-					Price:            1.25,
-				},
-				{
-					ShortDescription: "Dasani",
-					Price:            1.40,
-				},
-			},
-		},
-		{
-			Retailer:     "Target",
-			PurchaseDate: "2022-01-02",
-			PurchaseTime: "13:13",
-			Total:        1.25,
-			Items: []Item{
-				{
-					ShortDescription: "Pepsi - 12-oz",
-					Price:            1.25,
-				},
-			},
-		},
-		{
-			Retailer:     "Target",
-			PurchaseDate: "2022-01-01",
-			PurchaseTime: "13:01",
-			Total:        35.35,
-			Items: []Item{
-				{
-					ShortDescription: "Mountain Dew 12PK",
-					Price:            6.49,
-				},
-				{
-					ShortDescription: "Emils Cheese Pizza",
-					Price:            12.25,
-				},
-				{
-					ShortDescription: "Knorr Creamy Chicken",
-					Price:            1.26,
-				},
-				{
-					ShortDescription: "Doritos Nacho Cheese",
-					Price:            3.35,
-				},
-				{
-					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
-					Price:            12.00,
-				},
-			},
-		},
-		{
-			Retailer:     "M&M Corner Market",
-			PurchaseDate: "2022-03-20",
-			PurchaseTime: "14:33",
-			Total:        9.00,
-			Items: []Item{
-				{
-					ShortDescription: "Gatorade",
-					Price:            2.25,
-				},
-				{
-					ShortDescription: "Gatorade",
-					Price:            2.25,
-				},
-				{
-					ShortDescription: "Gatorade",
-					Price:            2.25,
-				},
-				{
-					ShortDescription: "Gatorade",
-					Price:            2.25,
-				},
+	// Date not in the format yyyy-mm-dd
+	dateNotInFormat := Receipt{
+		Retailer:     "Walgreens",
+		PurchaseDate: "202-01-02",
+		PurchaseTime: "08:13",
+		Total:        2.65,
+		Items: []Item{
+			{
+				ShortDescription: "Pepsi - 12-oz",
+				Price:            1.25,
 			},
 		},
 	}
-	return samples
+	receipts = append(receipts, dateNotInFormat)
+	errors = append(errors, fmt.Errorf("purchase date format should be in the format yyyy-mm-dd"))
+
+	// Date in format yyyy-mm-dd
+	dateInFormat := Receipt{
+		Retailer:     "Walgreens",
+		PurchaseDate: "2022-01-02",
+		PurchaseTime: "08:13",
+		Total:        2.65,
+		Items: []Item{
+			{
+				ShortDescription: "Pepsi - 12-oz",
+				Price:            1.25,
+			},
+		},
+	}
+	receipts = append(receipts, dateInFormat)
+	errors = append(errors, nil)
+
+	// Date not in the format yyyy-mm-dd
+	timeNotInFormat := Receipt{
+		Retailer:     "Walgreens",
+		PurchaseDate: "2022-01-02",
+		PurchaseTime: "8:13",
+		Total:        2.65,
+		Items: []Item{
+			{
+				ShortDescription: "Pepsi - 12-oz",
+				Price:            1.25,
+			},
+		},
+	}
+	receipts = append(receipts, timeNotInFormat)
+	errors = append(errors, fmt.Errorf("purchase time format should be in the format hh:mm"))
+
+	// Date in format yyyy-mm-dd
+	timeInFormat := Receipt{
+		Retailer:     "Walgreens",
+		PurchaseDate: "2022-01-02",
+		PurchaseTime: "08:13",
+		Total:        2.65,
+		Items: []Item{
+			{
+				ShortDescription: "Pepsi - 12-oz",
+				Price:            1.25,
+			},
+		},
+	}
+	receipts = append(receipts, timeInFormat)
+	errors = append(errors, nil)
+
+	return receipts, errors
 }
 
-// TODO: None of the falses explain what the difference is.
+// mock data for json convertion
+func convertJsonMockData() ([]string, []Receipt) {
+	var jsonPaths []string
+	var receipts []Receipt
+
+	// simple json
+	simpleJsonPath := "samples/simple.json"
+
+	simpleJsonReceipt := Receipt{
+		Retailer:     "Target",
+		PurchaseDate: "2022-01-02",
+		PurchaseTime: "13:13",
+		Total:        1.25,
+		Items: []Item{
+			{
+				ShortDescription: "Pepsi - 12-oz",
+				Price:            1.25,
+			},
+		},
+	}
+
+	jsonPaths = append(jsonPaths, simpleJsonPath)
+	receipts = append(receipts, simpleJsonReceipt)
+	// complex json
+
+	complexJsonPath := "samples/complex.json"
+
+	complexJsonReceipt := Receipt{
+		Retailer:     "Target",
+		PurchaseDate: "2022-01-01",
+		PurchaseTime: "13:01",
+		Total:        35.35,
+		Items: []Item{
+			{
+				ShortDescription: "Mountain Dew 12PK",
+				Price:            6.49,
+			},
+			{
+				ShortDescription: "Emils Cheese Pizza",
+				Price:            12.25,
+			},
+			{
+				ShortDescription: "Knorr Creamy Chicken",
+				Price:            1.26,
+			},
+			{
+				ShortDescription: "Doritos Nacho Cheese",
+				Price:            3.35,
+			},
+			{
+				ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
+				Price:            12.00,
+			},
+		},
+	}
+
+	jsonPaths = append(jsonPaths, complexJsonPath)
+	receipts = append(receipts, complexJsonReceipt)
+
+	return jsonPaths, receipts
+}
+
 func compareItems(itemA, itemB Item) error {
 	if itemA.ShortDescription != itemB.ShortDescription {
 		return fmt.Errorf("item shortdescription not same; Actual: %s, Expected: %s\n", itemA.ShortDescription, itemB.ShortDescription)
@@ -110,7 +150,6 @@ func compareItems(itemA, itemB Item) error {
 	return nil
 }
 
-// TODO: None of the falses return what is the difference in the receipts
 func compareReceipts(receiptA, receiptB Receipt) error {
 	if receiptA.Retailer != receiptB.Retailer {
 		return fmt.Errorf("Retailer name not same; Actual: %s, Expected: %s\n", receiptA.Retailer, receiptB.Retailer)
@@ -141,11 +180,11 @@ func compareReceipts(receiptA, receiptB Receipt) error {
 
 // TODO: Think about if you actually need this - because the code is pretty much standard.
 func TestConvertJson(t *testing.T) {
-	sampleJsonPaths := getSampleJsonPaths()
-	sampleReceipts := getSampleReceipts()
 
-	for index := 0; index < len(sampleJsonPaths); index++ {
-		sampleJsonPath := sampleJsonPaths[index]
+	jsonPaths, receipts := convertJsonMockData()
+
+	for index := 0; index < len(jsonPaths); index++ {
+		sampleJsonPath := jsonPaths[index]
 
 		// Read the file contents as bytes
 		fileBytes, err := ioutil.ReadFile(sampleJsonPath)
@@ -162,12 +201,33 @@ func TestConvertJson(t *testing.T) {
 			continue
 		}
 
-		expectedReceipt := sampleReceipts[index]
+		expectedReceipt := receipts[index]
 
 		// Compare actual and expected
 		err = compareReceipts(actualReceipt, expectedReceipt)
 		if err != nil {
 			t.Errorf("Comparison failed for %s with error: %s", sampleJsonPath, err)
+			continue
+		}
+	}
+}
+
+func TestValidationRules(t *testing.T) {
+	inputs, expectedOutputs := validationTestMockData()
+
+	for index := 0; index < len(inputs); index++ {
+		input := inputs[index]
+		expectedOutput := expectedOutputs[index]
+		actualOutput := validateReceipt(input)
+
+		if actualOutput != nil && expectedOutput == nil {
+			t.Errorf("For input %d, expected: nil actual: %s \n", index, actualOutput)
+			continue
+		} else if actualOutput == nil && expectedOutput != nil {
+			t.Errorf("For input %d, expected: %s actual: nil \n", index, expectedOutput)
+			continue
+		} else if actualOutput != nil && expectedOutput != nil && actualOutput.Error() != expectedOutput.Error() {
+			t.Errorf("For input %d, expected: %s actual: %s \n", index, expectedOutput, actualOutput)
 			continue
 		}
 	}

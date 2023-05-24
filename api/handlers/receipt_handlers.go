@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/sgoplan98/receipt_processor/api/models"
 )
 
 // TODO: Is this the right way to do? When is this created?
-var receiptPointsMapping = make(map[string]int)
+var receiptPointsMapping sync.Map
 
 // Compute points based off Retailer Name
 func computeRetailerNamePoints(retailerName string) int {
@@ -46,10 +47,7 @@ func descriptionPoints(receipt models.Receipt) int {
 }
 
 func datePoints(receipt models.Receipt) int {
-	// TODO: I'm blindly using 2 index here. How else should I do it?
-	// TODO: do you need string. then, convert to int?
 	dateString := strings.Split(receipt.PurchaseDate, "-")[2]
-	// TODO: Handle error?
 	date, _ := strconv.Atoi(dateString)
 
 	if date%2 == 1 {
@@ -60,11 +58,9 @@ func datePoints(receipt models.Receipt) int {
 
 func timePoints(receipt models.Receipt) int {
 	timeString := receipt.PurchaseTime
-	// TODO: 0 and 1 hardcoded.
 	hourString := strings.Split(timeString, ":")[0]
 	minuteString := strings.Split(timeString, ":")[1]
 
-	// TODO: Error handling
 	hour, _ := strconv.Atoi(hourString)
 	minute, _ := strconv.Atoi(minuteString)
 
@@ -80,8 +76,6 @@ func timePoints(receipt models.Receipt) int {
 }
 
 func computePoints(receipt models.Receipt) int {
-	// TODO: Check if you need to make functions for every point calculcation
-	// TODO: Check the datatype of total points
 	totalPoints := 0
 
 	// Add a point for each of the alphanum character in retailer name
@@ -89,8 +83,6 @@ func computePoints(receipt models.Receipt) int {
 	totalPoints += retailerNamePoints
 
 	// Add 50 points if Receipt total is round
-	// TODO: Check if any other type is possible?
-	// TODO: Check if I can convert the types when JSON is parsed?
 	receiptTotal := receipt.Total
 	isRound := math.Trunc(receiptTotal) == receiptTotal
 	if isRound {
@@ -98,21 +90,18 @@ func computePoints(receipt models.Receipt) int {
 	}
 
 	// Add 25 points if total is a multiple of 25 cents
-	// TODO: Check if this is variable naming is correct
 	is25Multiple := math.Trunc(4*receiptTotal) == 4*receiptTotal
 	if is25Multiple {
 		totalPoints += 25
 	}
 
 	// Add 5 points for every two items in the receipt
-	// TODO: name better
 	// TODO: Should I calculate length or can I use len() directly?
 	receiptItemsLength := len(receipt.Items)
 	numberOf2s := receiptItemsLength / 2
 	totalPoints += numberOf2s * 5
 
 	// Add points based off of description
-	// TODO: TODOs inside the function
 	totalPoints += descriptionPoints(receipt)
 
 	// Add points based off of date
@@ -139,7 +128,7 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	// TODO: Error handling done to be better - better text
 	if err != nil {
 		fmt.Println("Error reading from request body:", err)
-		// TODO: Return http something
+		http.Error(w, "Error reading the request body", http.StatusBadRequest)
 		return
 	}
 
@@ -148,7 +137,7 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	receipt, err := models.ConvertJsonToRecept(receiptJson)
 	if err != nil {
 		fmt.Println("Invalid data: ", err)
-		// TODO: Return http something
+		http.Error(w, "Error reading the request body", http.StatusBadRequest)
 		return
 	}
 
@@ -159,7 +148,7 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert the UUID to an alphanumeric string
 	id := uuidObj.String()
 
-	receiptPointsMapping[id] = points
+	receiptPointsMapping.Store(id, strconv.Itoa(points))
 
 	// Generate response and send response
 	response := models.ProcessResponse{
@@ -169,11 +158,9 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	// Convert Response to JSON
 	jsonData, _ := json.Marshal(response)
 
-	// Set the response headers
+	// Set the response headers and write the json data
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-
-	// Write the JSON data to the response body
 	fmt.Fprint(w, string(jsonData))
 }
 
@@ -182,7 +169,6 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("receipts points handler called")
 	if r.Method != "GET" {
 		http.NotFound(w, r)
-		// TODO: Do you need return?
 		return
 	}
 
@@ -204,7 +190,7 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := parts[2]
 
-	points, ok := receiptPointsMapping[id]
+	points, ok := receiptPointsMapping.Load(id)
 
 	if !ok {
 		fmt.Printf("ID %s not found\n", id)
@@ -213,7 +199,7 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pointsReponse := models.PointsResponse{
-		Points: strconv.Itoa(points),
+		Points: points.(string),
 	}
 
 	// Convert Response to JSON
