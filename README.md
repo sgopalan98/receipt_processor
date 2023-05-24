@@ -70,7 +70,7 @@ Example curl commands:
 ```
 .
 ├── Dockerfile (contains docker commands)
-├── README.md (contains Read me)
+├── README.md (contains README)
 ├── api (contains API code)
 │   ├── handlers
 │   │   ├── receipt_handlers.go (Handlers' endpoints)
@@ -85,10 +85,21 @@ Example curl commands:
 ├── go.mod
 ├── go.sum
 ├── main.go (start point for the program)
-
-
-
 ```
+
+
+### Comments 
+
+
+- My first time using Go; I apologize if code looks unclean
+- Some resources I found useful when learning:
+	- [go.dev learning tutorials](https://go.dev/learn/)
+	- [50 Shades of Go](https://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html)
+	- ChatGPT (ofcourse!)
+	- Please feel free to comment on anything!
+
+
+
 
 
 
