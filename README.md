@@ -14,7 +14,7 @@ This is a HTTP web-service that serves two end points:
 
 * [Docker!](https://docs.docker.com/get-docker/)
 * cURL (or any end point testing tool)
-* Go - (if you want to run tests)
+* Go - 1.19 (if you want to run tests)
 
 ## How to build?
 
@@ -23,7 +23,9 @@ This is a HTTP web-service that serves two end points:
 ## How to run?
 
  Step 1: `docker run -p 8080:8080 receipt-processor-image`
+ 
  Step 2: Open new terminal
+ 
  Step 3: Run cURL requests (with a JSON that you want to test) 
 
 
