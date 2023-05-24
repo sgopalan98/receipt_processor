@@ -7,137 +7,123 @@ import (
 )
 
 // mock data for validation
-func getValidationTestMockData() ([]Receipt, []error) {
-	var receipts []Receipt
-	var errors []error
-
-	// Date not in the format yyyy-mm-dd
-	dateNotInFormat := Receipt{
-		Retailer:     "Walgreens",
-		PurchaseDate: "202-01-02",
-		PurchaseTime: "08:13",
-		Total:        2.65,
-		Items: []Item{
-			{
-				ShortDescription: "Pepsi - 12-oz",
-				Price:            1.25,
+var validationTestMockData = []struct {
+	ReceiptData Receipt
+	Error       error
+}{
+	{
+		ReceiptData: Receipt{
+			Retailer:     "Walgreens",
+			PurchaseDate: "202-01-02",
+			PurchaseTime: "08:13",
+			Total:        2.65,
+			Items: []Item{
+				{
+					ShortDescription: "Pepsi - 12-oz",
+					Price:            1.25,
+				},
 			},
 		},
-	}
-	receipts = append(receipts, dateNotInFormat)
-	errors = append(errors, fmt.Errorf("purchase date format should be in the format yyyy-mm-dd"))
-
-	// Date in format yyyy-mm-dd
-	dateInFormat := Receipt{
-		Retailer:     "Walgreens",
-		PurchaseDate: "2022-01-02",
-		PurchaseTime: "08:13",
-		Total:        2.65,
-		Items: []Item{
-			{
-				ShortDescription: "Pepsi - 12-oz",
-				Price:            1.25,
+		Error: fmt.Errorf("purchase date format should be in the format yyyy-mm-dd"),
+	},
+	{
+		ReceiptData: Receipt{
+			Retailer:     "Walgreens",
+			PurchaseDate: "2022-01-02",
+			PurchaseTime: "08:13",
+			Total:        2.65,
+			Items: []Item{
+				{
+					ShortDescription: "Pepsi - 12-oz",
+					Price:            1.25,
+				},
 			},
 		},
-	}
-	receipts = append(receipts, dateInFormat)
-	errors = append(errors, nil)
-
-	// Date not in the format yyyy-mm-dd
-	timeNotInFormat := Receipt{
-		Retailer:     "Walgreens",
-		PurchaseDate: "2022-01-02",
-		PurchaseTime: "8:13",
-		Total:        2.65,
-		Items: []Item{
-			{
-				ShortDescription: "Pepsi - 12-oz",
-				Price:            1.25,
+		Error: nil,
+	},
+	{
+		ReceiptData: Receipt{
+			Retailer:     "Walgreens",
+			PurchaseDate: "2022-01-02",
+			PurchaseTime: "8:13",
+			Total:        2.65,
+			Items: []Item{
+				{
+					ShortDescription: "Pepsi - 12-oz",
+					Price:            1.25,
+				},
 			},
 		},
-	}
-	receipts = append(receipts, timeNotInFormat)
-	errors = append(errors, fmt.Errorf("purchase time format should be in the format hh:mm"))
-
-	// Date in format yyyy-mm-dd
-	timeInFormat := Receipt{
-		Retailer:     "Walgreens",
-		PurchaseDate: "2022-01-02",
-		PurchaseTime: "08:13",
-		Total:        2.65,
-		Items: []Item{
-			{
-				ShortDescription: "Pepsi - 12-oz",
-				Price:            1.25,
+		Error: fmt.Errorf("purchase time format should be in the format hh:mm"),
+	},
+	{
+		ReceiptData: Receipt{
+			Retailer:     "Walgreens",
+			PurchaseDate: "2022-01-02",
+			PurchaseTime: "08:13",
+			Total:        2.65,
+			Items: []Item{
+				{
+					ShortDescription: "Pepsi - 12-oz",
+					Price:            1.25,
+				},
 			},
 		},
-	}
-	receipts = append(receipts, timeInFormat)
-	errors = append(errors, nil)
-
-	return receipts, errors
+		Error: nil,
+	},
 }
 
 // mock data for json convertion
-func getConvertJsonMockData() ([]string, []Receipt) {
-	var jsonPaths []string
-	var receipts []Receipt
-
-	// simple json
-	simpleJsonPath := "samples/simple.json"
-
-	simpleJsonReceipt := Receipt{
-		Retailer:     "Target",
-		PurchaseDate: "2022-01-02",
-		PurchaseTime: "13:13",
-		Total:        1.25,
-		Items: []Item{
-			{
-				ShortDescription: "Pepsi - 12-oz",
-				Price:            1.25,
+var convertJsonMockData = []struct {
+	JsonPath    string
+	ReceiptData Receipt
+}{
+	{
+		JsonPath: "samples/simple.json",
+		ReceiptData: Receipt{
+			Retailer:     "Target",
+			PurchaseDate: "2022-01-02",
+			PurchaseTime: "13:13",
+			Total:        1.25,
+			Items: []Item{
+				{
+					ShortDescription: "Pepsi - 12-oz",
+					Price:            1.25,
+				},
 			},
 		},
-	}
-
-	jsonPaths = append(jsonPaths, simpleJsonPath)
-	receipts = append(receipts, simpleJsonReceipt)
-	// complex json
-
-	complexJsonPath := "samples/complex.json"
-
-	complexJsonReceipt := Receipt{
-		Retailer:     "Target",
-		PurchaseDate: "2022-01-01",
-		PurchaseTime: "13:01",
-		Total:        35.35,
-		Items: []Item{
-			{
-				ShortDescription: "Mountain Dew 12PK",
-				Price:            6.49,
-			},
-			{
-				ShortDescription: "Emils Cheese Pizza",
-				Price:            12.25,
-			},
-			{
-				ShortDescription: "Knorr Creamy Chicken",
-				Price:            1.26,
-			},
-			{
-				ShortDescription: "Doritos Nacho Cheese",
-				Price:            3.35,
-			},
-			{
-				ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
-				Price:            12.00,
+	},
+	{
+		JsonPath: "samples/complex.json",
+		ReceiptData: Receipt{
+			Retailer:     "Target",
+			PurchaseDate: "2022-01-01",
+			PurchaseTime: "13:01",
+			Total:        35.35,
+			Items: []Item{
+				{
+					ShortDescription: "Mountain Dew 12PK",
+					Price:            6.49,
+				},
+				{
+					ShortDescription: "Emils Cheese Pizza",
+					Price:            12.25,
+				},
+				{
+					ShortDescription: "Knorr Creamy Chicken",
+					Price:            1.26,
+				},
+				{
+					ShortDescription: "Doritos Nacho Cheese",
+					Price:            3.35,
+				},
+				{
+					ShortDescription: "   Klarbrunn 12-PK 12 FL OZ  ",
+					Price:            12.00,
+				},
 			},
 		},
-	}
-
-	jsonPaths = append(jsonPaths, complexJsonPath)
-	receipts = append(receipts, complexJsonReceipt)
-
-	return jsonPaths, receipts
+	},
 }
 
 func compareItems(itemA, itemB Item) error {
@@ -178,13 +164,12 @@ func compareReceipts(receiptA, receiptB Receipt) error {
 	return nil
 }
 
-// TODO: Think about if you actually need this - because the code is pretty much standard.
 func TestConvertJson(t *testing.T) {
 
-	jsonPaths, receipts := getConvertJsonMockData()
+	mockData := convertJsonMockData
 
-	for index := 0; index < len(jsonPaths); index++ {
-		sampleJsonPath := jsonPaths[index]
+	for index := 0; index < len(mockData); index++ {
+		sampleJsonPath := mockData[index].JsonPath
 
 		// Read the file contents as bytes
 		fileBytes, err := ioutil.ReadFile(sampleJsonPath)
@@ -201,7 +186,7 @@ func TestConvertJson(t *testing.T) {
 			continue
 		}
 
-		expectedReceipt := receipts[index]
+		expectedReceipt := mockData[index].ReceiptData
 
 		// Compare actual and expected
 		err = compareReceipts(actualReceipt, expectedReceipt)
@@ -213,11 +198,11 @@ func TestConvertJson(t *testing.T) {
 }
 
 func TestValidationRules(t *testing.T) {
-	inputs, expectedOutputs := getValidationTestMockData()
+	mockData := validationTestMockData
 
-	for index := 0; index < len(inputs); index++ {
-		input := inputs[index]
-		expectedOutput := expectedOutputs[index]
+	for index := 0; index < len(mockData); index++ {
+		input := mockData[index].ReceiptData
+		expectedOutput := mockData[index].Error
 		actualOutput := validateReceipt(input)
 
 		if actualOutput != nil && expectedOutput == nil {

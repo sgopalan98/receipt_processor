@@ -14,8 +14,7 @@ import (
 	"github.com/sgoplan98/receipt_processor/api/models"
 )
 
-// TODO: Is this the right way to do? When is this created?
-var receiptPointsMapping sync.Map
+var receiptPointsMap sync.Map
 
 // computeRetailerNamePoints -  Compute points based on Retailer Name
 //
@@ -26,6 +25,7 @@ var receiptPointsMapping sync.Map
 //   - Points awarded based on retailer name.
 func computeRetailerNamePoints(retailerName string) int {
 	count := 0
+	// Add a point for each of the alphanum character in retailer name
 	for _, char := range retailerName {
 		if (char >= 'a' && char <= 'z') || (char >= 'A' && char <= 'Z') || (char >= '0' && char <= '9') {
 			count++
@@ -45,7 +45,6 @@ func computeDescriptionPoints(items []models.Item) int {
 	points := 0
 	for _, item := range items {
 		trimmedItemDescription := strings.TrimSpace(item.ShortDescription)
-		// TODO: DO you actually need these variables or can you just use len straight forward?
 		trimmedItemDescriptionLength := len(trimmedItemDescription)
 		if trimmedItemDescriptionLength%3 == 0 {
 			//TODO: Problem statement - wrong? Round != Ceil. Notify
@@ -82,7 +81,6 @@ func computeDateTimePoints(receipt models.Receipt) int {
 	minute, _ := strconv.Atoi(minuteString)
 
 	// Add 10 points if time of purchase is after 2pm and before 4pm
-	// TODO: Write logic better?
 	if (hour == 14 && minute > 0) || hour == 15 {
 		dateTimePoints += 10
 	}
@@ -93,13 +91,12 @@ func computeDateTimePoints(receipt models.Receipt) int {
 // computeTotalCostPoints -  Compute points based on total cost
 //
 // Parameters:
-//   - Total cost: the total cost for the receipt
+//   - receiptTotal: the total cost for the receipt
 //
 // Return:
 //   - Points awarded based on the total cost of the receipt
-func computeTotalCostPoints(receipt models.Receipt) int {
+func computeTotalCostPoints(receiptTotal float64) int {
 	totalCostPoints := 0
-	receiptTotal := receipt.Total
 
 	// Add 50 points if Receipt total is round
 	isRound := math.Trunc(receiptTotal) == receiptTotal
@@ -126,18 +123,14 @@ func computeTotalCostPoints(receipt models.Receipt) int {
 func computePoints(receipt models.Receipt) int {
 	totalPoints := 0
 
-	// Add a point for each of the alphanum character in retailer name
-	retailerNamePoints := computeRetailerNamePoints(receipt.Retailer)
-	totalPoints += retailerNamePoints
+	// Add points based on retailter name
+	totalPoints += computeRetailerNamePoints(receipt.Retailer)
 
 	// Add points based off total cost in receipt
-	totalPoints += computeTotalCostPoints(receipt)
+	totalPoints += computeTotalCostPoints(receipt.Total)
 
 	// Add 5 points for every two items in the receipt
-	// TODO: Should I calculate length or can I use len() directly?
-	receiptItemsLength := len(receipt.Items)
-	numberOf2s := receiptItemsLength / 2
-	totalPoints += numberOf2s * 5
+	totalPoints += (len(receipt.Items) / 2) * 5
 
 	// Add points based on description
 	totalPoints += computeDescriptionPoints(receipt.Items)
@@ -164,7 +157,6 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	reqBodyBytes, err := ioutil.ReadAll(r.Body)
-	// TODO: Error handling done to be better - better text
 	if err != nil {
 		fmt.Println("Error reading from request body:", err)
 		http.Error(w, "Error reading the request body", http.StatusBadRequest)
@@ -182,18 +174,16 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 
 	points := computePoints(receipt)
 
-	// Generate a UUID string
+	// Generate a UUID string - ID for the receipt
 	uuidObj, _ := uuid.NewRandom()
 	id := uuidObj.String()
-	receiptPointsMapping.Store(id, strconv.Itoa(points))
+	receiptPointsMap.Store(id, strconv.Itoa(points))
 
 	// Generate response and send response
 	response := models.ProcessResponse{
 		Id: id,
 	}
-	// Convert Response to JSON
 	jsonData, _ := json.Marshal(response)
-	// Set the response headers and write the json data
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, string(jsonData))
@@ -216,10 +206,8 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get the path from the request URL
 	path := r.URL.Path
-	// Extract the id from the path
+	// Extract the id from the path & doing validation
 	parts := strings.Split(path, "/")
-	// Checking if URL is correct
-	// TODO: Should you check for more than 4? - Error?
 	if parts[1] != "receipts" {
 		http.NotFound(w, r)
 		return
@@ -230,21 +218,19 @@ func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	id := parts[2]
 
-	points, ok := receiptPointsMapping.Load(id)
+	points, ok := receiptPointsMap.Load(id)
 	if !ok {
 		fmt.Printf("ID %s not found\n", id)
 		http.NotFound(w, r)
 		return
 	}
 
+	// Generate response and send response
 	pointsReponse := models.PointsResponse{
 		Points: points.(string),
 	}
-	// Convert Response to JSON
 	jsonData, _ := json.Marshal(pointsReponse)
-	// Set the response headers
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	// Write the JSON data to the response body
 	fmt.Fprint(w, string(jsonData))
 }

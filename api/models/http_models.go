@@ -1,6 +1,5 @@
 package models
 
-// TODO: Name them better
 // Receipt process endpoint's Response struct
 type ProcessResponse struct {
 	Id string `json:"id"`
