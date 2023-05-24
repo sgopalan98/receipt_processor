@@ -101,14 +101,14 @@ func computePoints(receipt models.Receipt) int {
 	numberOf2s := receiptItemsLength / 2
 	totalPoints += numberOf2s * 5
 
-	// Add points based off of description
+	// Add points based on description
 	totalPoints += descriptionPoints(receipt)
 
-	// Add points based off of date
+	// Add points based on date
 	// TODO: do you need a function for this?
 	totalPoints += datePoints(receipt)
 
-	// Add points based off of time
+	// Add points based on time
 	// TODO: do you need a function for this?
 	totalPoints += timePoints(receipt)
 
@@ -143,9 +143,8 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 
 	points := computePoints(receipt)
 
-	// Generate a UUID
+	// Generate a UUID string
 	uuidObj, _ := uuid.NewRandom()
-	// Convert the UUID to an alphanumeric string
 	id := uuidObj.String()
 
 	receiptPointsMapping.Store(id, strconv.Itoa(points))
