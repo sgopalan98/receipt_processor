@@ -195,7 +195,7 @@ func TestConvertJson(t *testing.T) {
 
 		// Convert bytes to string
 		sampleJson := string(fileBytes)
-		actualReceipt, err := ConvertJsonToRecept(sampleJson)
+		actualReceipt, err := ConvertJsonToReceipt(sampleJson)
 		if err != nil {
 			t.Errorf("Failed to convert %s\n", err)
 			continue

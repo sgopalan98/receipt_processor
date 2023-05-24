@@ -21,7 +21,7 @@ type Receipt struct {
 	Items        []Item  `json:"items"`
 }
 
-func ConvertJsonToRecept(jsonStr string) (Receipt, error) {
+func ConvertJsonToReceipt(jsonStr string) (Receipt, error) {
 	// TODO: Is this the way to do?
 	var receipt Receipt
 	err := json.Unmarshal([]byte(jsonStr), &receipt)

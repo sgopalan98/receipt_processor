@@ -1,12 +1,12 @@
 package models
 
 // TODO: Name them better
-// Receipt Process endpoint Response struct
+// Receipt process endpoint's Response struct
 type ProcessResponse struct {
 	Id string `json:"id"`
 }
 
-// Receipt Points calculation endpoint Response struct
+// Receipt points endpoint's Response struct
 type PointsResponse struct {
 	Points string `json:"points"`
 }

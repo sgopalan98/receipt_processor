@@ -17,7 +17,13 @@ import (
 // TODO: Is this the right way to do? When is this created?
 var receiptPointsMapping sync.Map
 
-// Compute points based on Retailer Name
+// computeRetailerNamePoints -  Compute points based on Retailer Name
+//
+// Parameters:
+//   - retailerName: Name of the retailer in the receipt.
+//
+// Return:
+//   - Points awarded based on retailer name.
 func computeRetailerNamePoints(retailerName string) int {
 	count := 0
 	for _, char := range retailerName {
@@ -28,9 +34,14 @@ func computeRetailerNamePoints(retailerName string) int {
 	return count
 }
 
-// Compute points based on Item descriptions
-func computeDescriptionPoints(receipt models.Receipt) int {
-	items := receipt.Items
+// computeDescriptionPoints -  Compute points based on Item descriptions
+//
+// Parameters:
+//   - items: items in the receipt which have descriptions
+//
+// Return:
+//   - Points awarded based on item descriptions.
+func computeDescriptionPoints(items []models.Item) int {
 	points := 0
 	for _, item := range items {
 		trimmedItemDescription := strings.TrimSpace(item.ShortDescription)
@@ -46,7 +57,13 @@ func computeDescriptionPoints(receipt models.Receipt) int {
 	return points
 }
 
-// Compute points based on date time
+// computeDateTimePoints -  Compute points based on date time
+//
+// Parameters:
+//   - Receipt: the receipt data which has date & time
+//
+// Return:
+//   - Points awarded based on date and time.
 func computeDateTimePoints(receipt models.Receipt) int {
 	dateTimePoints := 0
 	dateString := strings.Split(receipt.PurchaseDate, "-")[2]
@@ -73,7 +90,13 @@ func computeDateTimePoints(receipt models.Receipt) int {
 	return dateTimePoints
 }
 
-// Compute points based on total cost
+// computeTotalCostPoints -  Compute points based on total cost
+//
+// Parameters:
+//   - Total cost: the total cost for the receipt
+//
+// Return:
+//   - Points awarded based on the total cost of the receipt
 func computeTotalCostPoints(receipt models.Receipt) int {
 	totalCostPoints := 0
 	receiptTotal := receipt.Total
@@ -93,7 +116,13 @@ func computeTotalCostPoints(receipt models.Receipt) int {
 	return totalCostPoints
 }
 
-// Compute total points
+// computeTotalCostPoints -  Compute total points for the receipt
+//
+// Parameters:
+//   - receipt : Receipt data
+//
+// Return:
+//   - Points awarded based on the data in receipt
 func computePoints(receipt models.Receipt) int {
 	totalPoints := 0
 
@@ -111,7 +140,7 @@ func computePoints(receipt models.Receipt) int {
 	totalPoints += numberOf2s * 5
 
 	// Add points based on description
-	totalPoints += computeDescriptionPoints(receipt)
+	totalPoints += computeDescriptionPoints(receipt.Items)
 
 	// Add points based on date and time
 	totalPoints += computeDateTimePoints(receipt)
@@ -119,6 +148,14 @@ func computePoints(receipt models.Receipt) int {
 	return totalPoints
 }
 
+// ReceiptsProcessHandler -  Handler to process the data of a receipt and generate unique ID for the receipt
+//
+// Parameters:
+//   - w : http.ResponseWriter
+//   - r : *http.Request
+//
+// Return:
+//   - ID generated for the receipt
 func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("receipts process handler called")
 	if r.Method != "POST" {
@@ -136,7 +173,7 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Convert bytes to string
 	receiptJson := string(reqBodyBytes)
-	receipt, err := models.ConvertJsonToRecept(receiptJson)
+	receipt, err := models.ConvertJsonToReceipt(receiptJson)
 	if err != nil {
 		fmt.Println("Invalid data: ", err)
 		http.Error(w, "Error in JSON format", http.StatusBadRequest)
@@ -162,7 +199,14 @@ func ReceiptsProcessHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(jsonData))
 }
 
-// TODO: all errors should be handled
+// ReceiptsProcessHandler -  Handler to get the data for the ID present in the URL
+//
+// Parameters:
+//   - w : http.ResponseWriter
+//   - r : *http.Request
+//
+// Return:
+//   - Points stored for the Receipt ID
 func ReceiptsPointsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("receipts points handler called")
 	if r.Method != "GET" {
